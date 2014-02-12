@@ -122,15 +122,23 @@ setMethod(show, "DMN",
 
 heatmapdmn <- 
     function(count, fit1, fitN, ntaxa=30, ..., transform=sqrt,
-             lblwidth=.2 * nrow(count), col=.gradient)
+             lblwidth=.2 * nrow(count), col=.gradient, order.rows=TRUE,
+             plot.weights=FALSE)
 {
     p1 <- fitted(fit1, scale=TRUE)
     pN <- fitted(fitN, scale=TRUE)
     diff <- rowSums(abs(pN - as.vector(p1)))
-    taxa <- rev(head(order(diff, decreasing=TRUE), ntaxa))
+    if (order.rows)
+        taxa <- rev(head(order(diff, decreasing=TRUE), ntaxa))
+    else
+        taxa <- rev(head(1:length(diff), ntaxa))
+
     pN <- pN[taxa,]
 
     cl <- mixture(fitN, assign=TRUE)
+    thetas <- round(mixturewt(fitN)$theta)
+    pis <- round(mixturewt(fitN)$pi, 2)
+
     ncl <- length(unique(cl))
     nms <- names(cl)
     grp <- factor(cl, levels=as.character(seq(1, ncl)))
@@ -141,10 +149,15 @@ heatmapdmn <-
     layout(matrix(seq(1, 2 * ncl + 1), nrow=1), widths=wd)
     op <- par(no.readonly=TRUE)
     on.exit(par(op), add=TRUE)
-    par(mar=c(1, 0, 1, 0))
+    topmargin <- ifelse(plot.weights, 4, 1)
+    par(mar=c(1, 0, topmargin, 0))
     for (i in seq_along(idx)) {
         image(transform(count[idx[[i]], taxa, drop=FALSE]),
               col=col, xaxt="n", yaxt="n")
+        if (plot.weights)
+            axis(3, c(0.5), labels=paste0('Group', i, ' \n\u03b8:',
+                                          thetas[i], ' \u03c0:', pis[i]))
+
         image(t(transform(pN[, i, drop=FALSE])),
               col=col, xaxt="n", yaxt="n")
     }
