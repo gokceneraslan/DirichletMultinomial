@@ -40,6 +40,7 @@ static void kmeans(struct data_t *data, gsl_rng *ptGSLRNG,
         double dTotal = 0.0;
         for (j = 0; j < S; j++)
             dTotal += aanX[j * N + i];
+        if (dTotal == 0.0) dTotal = 1.0; //workaround for -nan error
         for (j = 0; j < S; j++)
             aadY[j*N+i] = (aanX[j * N + i]) / dTotal;
     }
