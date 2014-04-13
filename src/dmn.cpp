@@ -162,10 +162,6 @@ static double neg_log_evidence_lambda_pi(const gsl_vector *lambda,
 static void neg_log_derive_evidence_lambda_pi(const gsl_vector *ptLambda,
         void *params, gsl_vector* g)
 {
-    //const struct data_t *data = (const struct data_t *) params;
-    //const int S = data->S, N = data->N, *aanX = data->aanX;
-    //const double *adPi = data->adPi;
-
     List lparams = wrap((SEXP) params);
     IntegerMatrix aanX = lparams["data"];
     NumericVector adPi = lparams["pi"];
@@ -220,8 +216,8 @@ static void neg_log_FDF_lamba_pi(const gsl_vector *x, void *params,
 
 
 // [[Rcpp::export]]
-NumericVector optimise_lambda_k(NumericVector adLambdaK, IntegerMatrix data,
-                              NumericVector adZ, double eta, double nu)
+NumericVector optimise_lambda_k(NumericVector LambdaK, IntegerMatrix data,
+                              NumericVector Z, double eta, double nu)
 {
     const int S = data.ncol();
 
@@ -236,10 +232,10 @@ NumericVector optimise_lambda_k(NumericVector adLambdaK, IntegerMatrix data,
     //initialise vector
     ptLambda = gsl_vector_alloc(S);
     for (i = 0; i < S; i++)
-        gsl_vector_set(ptLambda, i, adLambdaK[i]);
+        gsl_vector_set(ptLambda, i, LambdaK[i]);
 
     //initialise function to be solved
-    List params = List::create(_["pi"] = adZ, _["data"] = data,
+    List params = List::create(_["pi"] = Z, _["data"] = data,
                                _["eta"] = eta, _["nu"] = nu);
     fdf.n = S;
     fdf.f = neg_log_evidence_lambda_pi;
@@ -261,12 +257,12 @@ NumericVector optimise_lambda_k(NumericVector adLambdaK, IntegerMatrix data,
     } while (status == GSL_CONTINUE && iter < MAX_GRAD_ITER);
 
     for (i = 0; i < S; i++)
-        adLambdaK[i] = gsl_vector_get(s->x, i);
+        LambdaK[i] = gsl_vector_get(s->x, i);
 
     gsl_vector_free(ptLambda);
     gsl_multimin_fdfminimizer_free(s);
 
-    return adLambdaK;
+    return LambdaK;
 }
 
 // [[Rcpp::export]]
