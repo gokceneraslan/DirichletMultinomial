@@ -1,2 +1,1 @@
-PKG_LIBS += -L$(LIB_GSL)$(R_ARCH)/lib -lgsl -lgslcblas -lm
-PKG_CPPFLAGS += -I$(RHOME)/src/include -I$(LIB_GSL)$(R_ARCH)/include
+PKG_LIBS = $(shell "${R_HOME}/bin${R_ARCH_BIN}/Rscript.exe" -e "RcppGSL:::LdFlags()")

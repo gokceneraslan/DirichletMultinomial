@@ -10,14 +10,12 @@ setClass("DMN",
 }
 
 dmn <-
-    function(count, k, verbose=FALSE,
-             seed=runif(1, 0, .Machine$integer.max),maxIt=100)
+    function(count, k, verbose=FALSE, seed=-1, maxIt=100, randomInit=T)
 {
     if (verbose)
         message(sprintf("dmn, k=%d", k))
     mode(count) <- "integer"
-    ans <- .Call(.dirichlet_fit, count, as.integer(k),
-                 as.logical(verbose), as.integer(seed),as.integer(maxIt))
+    ans <- DMN.cluster(count, k, seed=seed, verbose=verbose, EM.maxit=maxIt, randomInit=randomInit)
     o <- order(ans$Mixture$Weight, decreasing=TRUE)
     ans <- within(ans, {
         Group <- Group[,o, drop=FALSE]
@@ -28,8 +26,6 @@ dmn <-
          .DMN(goodnessOfFit=GoodnessOfFit, group=Group,
               mixture=Mixture, fit=Fit))
 }
-
-## k-means
 
 mixture <-
     function(object, ..., assign=FALSE)
@@ -73,7 +69,7 @@ setMethod(fitted, "DMN", .fitted.DMN)
 
 ## predict
 
-.neg_log_evidence_i <- 
+.neg_log_evidence_i <-
     function(x, alpha)
 {
     .B <- function(x)
@@ -81,7 +77,7 @@ setMethod(fitted, "DMN", .fitted.DMN)
     -(.B(x + alpha) - .B(alpha))
 }
 
-.predict.DMN <- 
+.predict.DMN <-
     function(object, newdata, ..., logevidence=FALSE)
 {
     if (is.vector(newdata))
@@ -120,7 +116,7 @@ setMethod(show, "DMN",
         "AIC:", AIC(object), "\n")
 })
 
-heatmapdmn <- 
+heatmapdmn <-
     function(count, fit1, fitN, ntaxa=30, ..., transform=sqrt,
              lblwidth=.2 * nrow(count), col=.gradient, order.rows=TRUE,
              plot.weights=FALSE)

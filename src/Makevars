@@ -1,2 +1,1 @@
-PKG_CFLAGS = `gsl-config --cflags` -DR_DIRICHLETMULTINOMIAL
-PKG_LIBS = `gsl-config --libs`
+PKG_LIBS = `$(R_HOME)/bin/Rscript -e "RcppGSL:::LdFlags()"`
