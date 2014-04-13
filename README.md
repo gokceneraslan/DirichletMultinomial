@@ -1,4 +1,4 @@
 DirichletMultinomial
 ====================
 
-Dirchlet Multinomial Mixture Distribution by Christopher Quince and Martin Morgan
+Dirchlet Multinomial Mixture Distribution by Christopher Quince, Martin Morgan and Gökcen Eraslan
